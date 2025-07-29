@@ -1,0 +1,565 @@
+{
+  "name": "Voicenotes To Slack And Nuclino",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "webhook-path-placeholder",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -48,
+        -368
+      ],
+      "id": "webhook-node-id",
+      "name": "Webhook",
+      "webhookId": "webhook-id-placeholder"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.prompt }}",
+        "options": {
+          "systemMessage": "You are a helpful assistant to [USERNAME].\n\nYou will receive prompts via a workflow system and must respond with a detailed, accurate, and well-structured answer following a **single-turn format**.\n\nYour response **must be in standard Markdown** and follow **this exact structure**:\n\n```\n**SUMMARY**  \n{One-line plain-English summary of the final response}\n\n**PROMPT**  \n{A concise, human-readable summary of the original prompt or request}\n\n**RESPONSE**  \n{A detailed, structured answer. Use clear headings, bullet points, and paragraphs. If applicable, include:\n- Tables comparing tools, products, or approaches\n- An executive summary section at the start\n- A "Sources" section at the end with relevant URLs or references}\n```\n\n---\n\n### Content Guidelines\n\n* Prioritize **clarity**, **depth**, and **accuracy**.\n* When comparing options, include both:\n\n  * A **summary comparison table**\n  * A **brief executive summary**\n* Include **direct URLs for all tools, documentation, and sources** in a separate `Sources` section.\n* Ensure the Markdown renders correctly on Slack, GitHub, Obsidian, Notion, and other common markdown renderers.\n\n---\n\n### Voice and Style\n\n* Use a **direct, factual, analytical** tone.\n* Structure long responses with `##` section headers, bullet points, numbered lists, and tables.\n* Avoid vague or generic advice.\n* Assume the reader is technically literate and wants **actionable insights** and **verifiable sources**.\n\n---\n\n**Always include all three sections: `SUMMARY`, `PROMPT`, and `RESPONSE`. Never respond with HTML, JSON, or any other format.**\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        224,
+        -64
+      ],
+      "id": "ai-agent-node-id",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "anthropic/claude-sonnet-4",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        0,
+        160
+      ],
+      "id": "openrouter-node-id",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "openrouter-credential-id",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "assignment-id-1",
+              "name": "note_title",
+              "value": "={{ $json.body.data.title }}",
+              "type": "string"
+            },
+            {
+              "id": "assignment-id-2",
+              "name": "prompt",
+              "value": "={{ $json.body.data.transcript }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        272,
+        -288
+      ],
+      "id": "edit-fields-node-id",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "assignment-id-3",
+              "name": "note_title",
+              "value": "={{ $('Edit Fields').item.json.note_title }}",
+              "type": "string"
+            },
+            {
+              "id": "assignment-id-4",
+              "name": "prompt",
+              "value": "={{ $('Edit Fields').item.json.prompt }}",
+              "type": "string"
+            },
+            {
+              "id": "assignment-id-5",
+              "name": "output",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            },
+            {
+              "id": "assignment-id-6",
+              "name": "created",
+              "value": "={{ $('Webhook').item.json.body.timestamp }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        896,
+        -304
+      ],
+      "id": "edit-fields1-node-id",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "authentication": "nocoDbApiToken",
+        "operation": "create",
+        "projectId": "nocodb-project-id",
+        "table": "nocodb-table-id-1",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldName": "nocodb-field-id-1",
+              "fieldValue": "={{ $json.prompt }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.nocoDb",
+      "typeVersion": 3,
+      "position": [
+        1136,
+        -432
+      ],
+      "id": "save-prompt-node-id",
+      "name": "Save Prompt",
+      "credentials": {
+        "nocoDbApiToken": {
+          "id": "nocodb-credential-id",
+          "name": "NocoDB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "nocoDbApiToken",
+        "operation": "create",
+        "projectId": "nocodb-project-id",
+        "table": "nocodb-table-id-2",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldName": "nocodb-field-id-2",
+              "fieldValue": "={{ $('AI Agent').item.json.output }}"
+            },
+            {
+              "fieldName": "nocodb-field-id-3",
+              "fieldValue": "={{ $('Edit Fields1').item.json.prompt }}"
+            },
+            {
+              "fieldName": "nocodb-field-id-4",
+              "fieldValue": "Voicenotes.com Automation (N8N)"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.nocoDb",
+      "typeVersion": 3,
+      "position": [
+        1456,
+        -400
+      ],
+      "id": "save-output-node-id",
+      "name": "Save Output",
+      "credentials": {
+        "nocoDbApiToken": {
+          "id": "nocodb-credential-id",
+          "name": "NocoDB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "slack-channel-id",
+          "mode": "list",
+          "cachedResultName": "ai-prompt-outputs"
+        },
+        "text": "=*New AI Response - {{ $json.data.title }}*\n\n*PROMPT*\n\n{{ $('Merge').item.json.prompt }}\n\n*RESPONSE:*\n\n{{ $('Merge').item.json.output }}\n\n*NUCLINO NOTE URL:*\n\n{{ $json.data.url }}",
+        "otherOptions": {
+          "mrkdwn": true,
+          "unfurl_links": true,
+          "unfurl_media": true
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1216,
+        96
+      ],
+      "id": "slack-message-node-id",
+      "name": "Send a message",
+      "webhookId": "slack-webhook-id",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "slack-credential-id",
+          "name": "Slack Notifier"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        656,
+        -112
+      ],
+      "id": "merge-node-id",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.nuclino.com/v0/items",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "workspaceId",
+              "value": "nuclino-workspace-id"
+            },
+            {
+              "name": "title",
+              "value": "={{ $json.note_title }}"
+            },
+            {
+              "name": "collectionID",
+              "value": "nuclino-collection-id"
+            },
+            {
+              "name": "=content",
+              "value": "=## {{ $json.note_title }}\n\n### Created\n\n{{ $json.created }}\n\n## Prompt\n\n{{ $json.prompt }}\n\n## AI Response\n\n{{ $json.output }}"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        928,
+        64
+      ],
+      "id": "http-request-node-id",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "nuclino-credential-id",
+          "name": "Nuclino"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Voicenotes voice note tagged as prompt\n",
+        "height": 128,
+        "width": 224
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -192,
+        -496
+      ],
+      "typeVersion": 1,
+      "id": "sticky-note-1-id",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Gets sent to an AI agent",
+        "height": 112,
+        "width": 224
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        224,
+        160
+      ],
+      "typeVersion": 1,
+      "id": "sticky-note-2-id",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Concatenating prompt + response",
+        "width": 224
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        544,
+        -288
+      ],
+      "typeVersion": 1,
+      "id": "sticky-note-3-id",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Saving to NocoDB for archive"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        784,
+        -480
+      ],
+      "typeVersion": 1,
+      "id": "sticky-note-4-id",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Create a doc in Nuclino",
+        "height": 112,
+        "width": 208
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        896,
+        -112
+      ],
+      "typeVersion": 1,
+      "id": "sticky-note-5-id",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## Notify Via Slack",
+        "height": 112,
+        "width": 208
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1200,
+        -80
+      ],
+      "typeVersion": 1,
+      "id": "sticky-note-6-id",
+      "name": "Sticky Note5"
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "your-n8n-domain.com",
+            "user-agent": "GuzzleHttp/7",
+            "content-length": "204",
+            "accept-encoding": "gzip, br",
+            "authorization": "Bearer",
+            "cdn-loop": "cloudflare; loops=1",
+            "cf-connecting-ip": "xxx.xxx.xxx.xxx",
+            "cf-ipcountry": "US",
+            "cf-ray": "example-ray-id",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "cf-warp-tag-id": "example-warp-tag-id",
+            "connection": "keep-alive",
+            "content-type": "application/json",
+            "x-forwarded-for": "xxx.xxx.xxx.xxx",
+            "x-forwarded-proto": "https"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "event": "recording.created",
+            "timestamp": "2025-07-29T11:38:52+00:00",
+            "data": {
+              "id": "example-id",
+              "title": "How many days are in the calendar year",
+              "transcript": "How many days are there in the calendar year?"
+            }
+          },
+          "webhookUrl": "https://your-n8n-domain.com/webhook-test/example-webhook-id",
+          "executionMode": "test"
+        }
+      }
+    ],
+    "Edit Fields": [
+      {
+        "json": {
+          "created": "2025-07-29T11:38:52+00:00",
+          "note_title": "How many days are in the calendar year",
+          "prompt": "How many days are there in the calendar year?"
+        }
+      }
+    ],
+    "Merge": [
+      {
+        "json": {
+          "output": "**SUMMARY**  \nA standard calendar year has 365 days, while a leap year has 366 days due to an extra day added in February.\n\n**PROMPT**  \nRequest for the number of days in a calendar year.\n\n**RESPONSE**  \n\n## Standard Calendar Year\n\nA calendar year typically contains **365 days**. This is based on the Gregorian calendar system used in most of the world today.\n\n## Leap Years\n\nEvery four years (with some exceptions), we have a **leap year** containing **366 days**. The extra day is added to February, making it 29 days instead of the usual 28.\n\n### Leap Year Rules\n\n- **Divisible by 4**: Generally a leap year\n- **Divisible by 100**: Not a leap year (exception to the rule above)\n- **Divisible by 400**: Is a leap year (exception to the exception)\n\n### Examples\n- 2024: Leap year (366 days)\n- 2023: Standard year (365 days)\n- 2100: Not a leap year despite being divisible by 4 (divisible by 100 but not 400)\n- 2000: Leap year (divisible by 400)\n\n## Summary\n\n| Year Type | Days | Frequency |\n|-----------|------|-----------|\n| Standard Year | 365 | ~75% of years |\n| Leap Year | 366 | ~25% of years (every 4 years with exceptions) |\n\nThe leap year system exists to keep our calendar aligned with Earth's orbital period around the Sun, which is approximately 365.25 days.",
+          "created": "2025-07-29T11:38:52+00:00",
+          "note_title": "How many days are in the calendar year",
+          "prompt": "How many days are there in the calendar year?"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Save Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Prompt": {
+      "main": [
+        [
+          {
+            "node": "Save Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Output": {
+      "main": [
+        []
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "example-version-id",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "example-instance-id"
+  },
+  "id": "example-workflow-id",
+  "tags": [
+    {
+      "createdAt": "2025-07-29T16:47:02.871Z",
+      "updatedAt": "2025-07-29T16:47:02.871Z",
+      "id": "example-tag-id-1",
+      "name": "For Public Sharing"
+    },
+    {
+      "createdAt": "2025-07-29T16:47:11.199Z",
+      "updatedAt": "2025-07-29T16:47:11.199Z",
+      "id": "example-tag-id-2",
+      "name": "Nuclino"
+    }
+  ]
+}
