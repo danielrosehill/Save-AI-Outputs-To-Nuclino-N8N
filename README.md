@@ -141,4 +141,45 @@ While designed for Voicenotes.com, the webhook can accept data from any source t
 - `transcript` or `content` field
 - `timestamp` field
 
+---
+
+## 📝 Worked Example
+
+Here's a complete walkthrough of the workflow in action:
+
+### Step 1: Create a Voice Note in Voicenotes.com
+
+Start by creating a voice note in Voicenotes.com with your question or prompt:
+
+![Voice Note Creation](images/example/1.png)
+
+### Step 2: Workflow Processes the Voice Note
+
+Once the voice note is created, Voicenotes.com sends a webhook to your N8N workflow. The workflow extracts the transcript and processes it through the AI agent:
+
+![Workflow Processing](images/example/2.png)
+
+### Step 3: AI Generates Structured Response
+
+The AI agent (powered by Claude Sonnet via OpenRouter) generates a structured response following the predefined format with Summary, Prompt, and Response sections:
+
+![AI Response Generation](images/example/3.png)
+
+### Step 4: Documentation Created and Notifications Sent
+
+The workflow creates a structured document in Nuclino and sends a notification to your Slack channel with the complete interaction:
+
+![Final Output](images/example/4.png)
+
+### What Happens Behind the Scenes:
+
+1. **Voice Note Webhook**: Voicenotes.com sends POST request with transcript data
+2. **Data Extraction**: N8N extracts title and transcript from the webhook payload
+3. **AI Processing**: Claude Sonnet processes the prompt and generates structured response
+4. **Document Creation**: Nuclino document created with formatted content
+5. **Team Notification**: Slack message sent with prompt, response, and document link
+6. **Archiving**: Both prompt and response stored in NocoDB for future reference
+
+This entire process typically takes 15-30 seconds from voice note creation to final notification.
+
  
