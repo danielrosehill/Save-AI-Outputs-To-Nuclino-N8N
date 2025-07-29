@@ -4,6 +4,21 @@
 
 An N8N workflow that automatically processes voice notes from Voicenotes.com, sends them to AI for processing, creates documentation in Nuclino, and sends notifications via Slack.
 
+## Table of Contents
+
+- [Features](#features)
+- [Prerequisites](#prerequisites)
+- [Setup Instructions](#setup-instructions)
+  - [1. Import the Workflow](#1-import-the-workflow)
+  - [2. Configure Nuclino Integration](#2-configure-nuclino-integration)
+  - [3. Configure Other Integrations](#3-configure-other-integrations)
+  - [4. Workflow Configuration](#4-workflow-configuration)
+- [How It Works](#how-it-works)
+- [Output Format](#output-format)
+- [Related Resources](#related-resources)
+- [Customization](#customization)
+- [Worked Example](#worked-example)
+
 ## 🚀 Features
 
 - **Voice Note Processing**: Automatically receives voice notes via webhook
