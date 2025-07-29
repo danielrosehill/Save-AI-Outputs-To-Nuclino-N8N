@@ -19,7 +19,7 @@ An N8N workflow that automatically processes voice notes from Voicenotes.com, se
 - [Customization](#customization)
 - [Worked Example](#worked-example)
 
-## 🚀 Features
+## Features
 
 - **Voice Note Processing**: Automatically receives voice notes via webhook
 - **AI Integration**: Uses OpenRouter API with Claude Sonnet for intelligent responses
@@ -28,7 +28,7 @@ An N8N workflow that automatically processes voice notes from Voicenotes.com, se
 - **Archiving**: Stores prompts and outputs in NocoDB for record keeping
 - **Structured Output**: Enforces consistent markdown format with Summary, Prompt, and Response sections
 
-## 📋 Prerequisites
+## Prerequisites
 
 - [N8N](https://n8n.io/) instance (self-hosted or cloud)
 - [Nuclino](https://www.nuclino.com/) account and API access
@@ -37,7 +37,7 @@ An N8N workflow that automatically processes voice notes from Voicenotes.com, se
 - [Voicenotes.com](https://voicenotes.com/) account (optional - for voice input)
 - [NocoDB](https://nocodb.com/) instance (optional - for archiving)
 
-## 🔧 Setup Instructions
+## Setup Instructions
 
 ### 1. Import the Workflow
 
@@ -103,7 +103,7 @@ Update the following parameters in the workflow:
 - **Slack Channel ID**: Channel for notifications
 - **AI Model**: Configure your preferred model (default: Claude Sonnet)
 
-## 📖 How It Works
+## How It Works
 
 1. **Webhook Trigger**: Receives voice note data from Voicenotes.com
 2. **Data Processing**: Extracts title and transcript from the webhook payload
@@ -116,7 +116,7 @@ Update the following parameters in the workflow:
 5. **Notification**: Sends formatted message to Slack with note URL
 6. **Archiving**: Stores data in NocoDB for future reference
 
-## 🎯 Output Format
+## Output Format
 
 The AI agent is configured to provide structured responses in this format:
 
@@ -131,14 +131,14 @@ The AI agent is configured to provide structured responses in this format:
 {Detailed, structured answer with headings, bullet points, and tables}
 ```
 
-## 🔗 Related Resources
+## Related Resources
 
 - **[Nuclino API Documentation (Unofficial)](https://github.com/danielrosehill/Nuclino-API-Docs-Unofficial-0725)** - Comprehensive API documentation
 - **[Nuclino Official Website](https://www.nuclino.com/)** - Team knowledge base platform
 - **[Nuclino API](https://www.nuclino.com/api)** - Official API documentation
 - **[N8N Creator Profile](https://n8n.io/creators/danielrosehill/)** - More N8N workflows and templates
 
-## 🛠️ Customization
+## Customization
 
 ### Modifying AI Behavior
 Edit the system message in the AI Agent node to change response format or behavior.
@@ -158,7 +158,7 @@ While designed for Voicenotes.com, the webhook can accept data from any source t
 
 ---
 
-## 📝 Worked Example
+## Worked Example
 
 Here's a complete walkthrough of the workflow in action:
 
